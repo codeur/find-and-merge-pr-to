@@ -19,8 +19,8 @@ The target branch.
 
 ## Example usage
 
-```
-uses: actions/find-and-merge-pr-to@v1
+```yaml
+uses: codeur/find-and-merge-pr-to@v1
 with:
   token: ${{ secrets.GITHUB_TOKEN }}
   searchString: my awesome pullrequest
