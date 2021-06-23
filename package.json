@@ -1,0 +1,16 @@
+{
+  "name": "codeur-find-pr-and-merge-action",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.4.0",
+    "@actions/github": "^5.0.0",
+    "@codeur/eslint-config": "^1.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^7.28.0"
+  }
+}

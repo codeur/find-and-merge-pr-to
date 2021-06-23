@@ -1,0 +1,20 @@
+name: Find and merge PR to
+description: Find a pull request and merge it
+branding:
+  icon: 'book-open'
+  color: 'blue'
+inputs:
+  token:
+    description: Github token
+    required: true
+  searchString:
+    description: String for pull request search query
+    required: true
+  mergeIn:
+    description: Target Branch
+  mergePull:
+    description: Set it to true if willing to merge the PR and delete the headRef
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
