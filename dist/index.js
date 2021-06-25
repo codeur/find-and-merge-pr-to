@@ -6125,56 +6125,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 526:
-/***/ (() => {
-
-const mergeBranch = async  (pullRequest) => {
-  return await octokit.graphql(`
-      mutation mergeBranch($base: String!, $commitMessage: String!, $head: String!, $repositoryId: String!){
-        mergeBranch(input: { base: $base, commitMessage: $commitMessage, head: $head, repositoryId: $repositoryId }) {
-          clientMutationId
-        }
-      }
-    `,
-  {
-    base: mergeIn,
-    commitMessage: `Merging ${pullRequest.headRef.name} in ${mergeIn}`,
-    head: pullRequest.headRef.name,
-    repositoryId: pullRequest.repository.id
-  })
-}
-
-const mergePullRequest = async  (pullRequest) => {
-  await octokit.graphql(`
-      mutation mergePullRequest($pullRequestId: String!){
-        mergePullRequest(input: { pullRequestId: $pullRequestId }) {
-          clientMutationId
-        }
-      }
-    `,
-  {
-    pullRequestId: pullRequest.id
-  })
-
-  return octokit.graphql(`
-      mutation deleteRef($refId: String!){
-        deleteRef(input: { refId: $refId }) {
-          clientMutationId
-        }
-      }
-    `,
-  {
-    refId: pullRequest.headRef.id
-  })
-}
-
-const sleep = async  (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-
-/***/ }),
-
 /***/ 95:
 /***/ ((module) => {
 
@@ -6328,14 +6278,13 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(29)
 const github = __nccwpck_require__(974)
-const {mergeBranch, mergePullRequest, sleep} = __nccwpck_require__(526)
 const token = core.getInput('token')
 const octokit = github.getOctokit(token, { previews: ['merge-info-preview'] })
-const issueKey = core.getInput('issueKey')
+const searchString = core.getInput('searchString')
 const mergeIn = core.getInput('mergeIn')
 const mergePull = core.getInput('mergePull')
 
-async function exec () {
+async function main() {
   try {
     if (!mergeIn && !mergePull) throw new Error('Neither mergeIn or mergePull is specified')
 
@@ -6363,10 +6312,11 @@ async function exec () {
   }
 }
 
-exec()
+main()
 
-async function getPullRequest () {
-  const searchResult = await octokit.graphql(`
+async function getPullRequest() {
+  const searchResult = await octokit.graphql(
+    `
       query targetPullRequest($queryString: String!) {
         search(last: 1, query: $queryString, type: ISSUE) {
           nodes {
@@ -6389,11 +6339,62 @@ async function getPullRequest () {
         }
       }
     `,
-  {
-    queryString: `is:pr ${issueKey} in:title repo:${github.context.payload.repository.full_name}`
-  })
+    {
+      queryString: `is:pr ${searchString} in:title repo:${github.context.payload.repository.full_name}`
+    }
+  )
 
   return searchResult.search.nodes[0]
+}
+
+async function mergeBranch(pullRequest) {
+  return await octokit.graphql(
+    `
+      mutation mergeBranch($base: String!, $commitMessage: String!, $head: String!, $repositoryId: String!){
+        mergeBranch(input: { base: $base, commitMessage: $commitMessage, head: $head, repositoryId: $repositoryId }) {
+          clientMutationId
+        }
+      }
+    `,
+    {
+      base: mergeIn,
+      commitMessage: `Merging ${pullRequest.headRef.name} in ${mergeIn}`,
+      head: pullRequest.headRef.name,
+      repositoryId: pullRequest.repository.id
+    }
+  )
+}
+
+async function mergePullRequest(pullRequest) {
+  await octokit.graphql(
+    `
+      mutation mergePullRequest($pullRequestId: String!){
+        mergePullRequest(input: { pullRequestId: $pullRequestId }) {
+          clientMutationId
+        }
+      }
+    `,
+    {
+      pullRequestId: pullRequest.id
+    }
+  )
+
+  return octokit.graphql(
+    `
+      mutation deleteRef($refId: String!){
+        deleteRef(input: { refId: $refId }) {
+          clientMutationId
+        }
+      }
+    `,
+    {
+      refId: pullRequest.headRef.id
+    }
+  )
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 })();
