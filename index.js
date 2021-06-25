@@ -20,7 +20,7 @@ async function main() {
     }
 
     if (pullRequest.mergeable !== 'MERGEABLE' || pullRequest.mergeStateStatus !== 'CLEAN') {
-      console.error(`Mergeable : ${pullRequest.mergeable}, Merge state status : ${pullRequest.mergeStateStatus}`)
+      console.error(`Mergeable: ${pullRequest.mergeable}, Merge state status: ${pullRequest.mergeStateStatus}`)
       throw new Error(`Pull Request is not ready for merging in ${mergeIn}`)
     }
 
