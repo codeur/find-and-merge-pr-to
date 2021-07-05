@@ -34,7 +34,7 @@ Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/e
 ncc build index.js --license licenses.txt
 git add .
 git commit -m "My super commit"
-git tag -a -m "My super release" v1.1
+git tag -a -m "My super release" vX.X.X
 git push --follow-tags
 ```
 
