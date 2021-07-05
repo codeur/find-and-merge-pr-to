@@ -6297,9 +6297,10 @@ async function main() {
       queryAttemptCount++
     }
 
-    if (pullRequest.mergeable !== 'MERGEABLE' || pullRequest.mergeStateStatus !== 'CLEAN') {
-      console.error(`Mergeable : ${pullRequest.mergeable}, Merge state status : ${pullRequest.mergeStateStatus}`)
-      throw new Error(`Pull Request is not ready for merging in ${mergeIn}`)
+    if (pullRequest.mergeable !== 'MERGEABLE' || (pullRequest.mergeStateStatus !== 'CLEAN' && mergePull)) {
+      throw new Error(
+        `Pull Request is not ready for merging : Mergeable -> ${pullRequest.mergeable}, Merge state status -> ${pullRequest.mergeStateStatus}`
+      )
     }
 
     if (mergePull) {
@@ -6315,6 +6316,7 @@ async function main() {
 main()
 
 async function getPullRequest() {
+  // TODO: query for all PR and filter by regex to be sure we don't get DC-421 if we enter DC-42
   const searchResult = await octokit.graphql(
     `
       query targetPullRequest($queryString: String!) {
