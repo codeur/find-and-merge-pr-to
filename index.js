@@ -74,7 +74,7 @@ async function getPullRequest() {
 async function mergeBranch(pullRequest) {
   return await octokit.graphql(
     `
-      mutation mergeBranch($base: String!, $commitMessage: String!, $head: String!, $repositoryId: String!){
+      mutation mergeBranch($base: String!, $commitMessage: String!, $head: String!, $repositoryId: ID!){
         mergeBranch(input: { base: $base, commitMessage: $commitMessage, head: $head, repositoryId: $repositoryId }) {
           clientMutationId
         }
@@ -92,7 +92,7 @@ async function mergeBranch(pullRequest) {
 async function mergePullRequest(pullRequest) {
   await octokit.graphql(
     `
-      mutation mergePullRequest($pullRequestId: String!){
+      mutation mergePullRequest($pullRequestId: ID!){
         mergePullRequest(input: { pullRequestId: $pullRequestId }) {
           clientMutationId
         }
@@ -105,7 +105,7 @@ async function mergePullRequest(pullRequest) {
 
   return octokit.graphql(
     `
-      mutation deleteRef($refId: String!){
+      mutation deleteRef($refId: ID!){
         deleteRef(input: { refId: $refId }) {
           clientMutationId
         }
