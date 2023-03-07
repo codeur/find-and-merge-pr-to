@@ -35,6 +35,7 @@ with:
 Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github) section using `@vercel/ncc` to push changes to the action or use :
 
 ```
+yarn install
 ncc build index.js --license licenses.txt
 git add .
 git commit -m "My super commit"
