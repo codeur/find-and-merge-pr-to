@@ -3,19 +3,22 @@
 This action finds a pull request and merges it (or its head ref to a target branch).
 
 ## Inputs
+
 ### `Token` (`string`)
 
 **Required** Github token.
+
 ### `searchString` (`string`)
 
 **Required** The search string used for the pull request query.
+
 ### `mergePull` (`boolean`)
 
 Wether or not merging, closing PR and deleting PR headRef.
+
 ### `mergeIn` (`string`)
 
 The target branch.
-
 
 ## Example usage
 
@@ -29,7 +32,8 @@ with:
 
 ## Development and release
 
-Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github) section using `@vercell/ncc` to push changes to the action or use :
+Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github) section using `@vercel/ncc` to push changes to the action or use :
+
 ```
 ncc build index.js --license licenses.txt
 git add .
@@ -39,4 +43,5 @@ git push --follow-tags
 ```
 
 ## License
+
 This Github Action is available as open source under the terms of the MIT License. Copyright 2021 Codeur SARL.
