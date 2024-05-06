@@ -16,5 +16,5 @@ inputs:
     description: Set it to true if willing to merge the PR and delete the headRef
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

@@ -31,7 +31,10 @@ async function main() {
       await mergeBranch(pullRequest)
     }
   } catch (error) {
-    core.setFailed(error.toString())
+    core.info(error.stack)
+    if (!error.toString().includes('GraphqlResponseError')) {
+      core.setFailed(error)
+    }
   }
 }
 
