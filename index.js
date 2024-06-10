@@ -32,9 +32,10 @@ async function main() {
     }
   } catch (error) {
     core.info(error.stack)
-    if (!error.toString().includes('GraphqlResponseError')) {
-      core.setFailed(error)
-    }
+    // if (!error.toString().includes('GraphqlResponseError')) {
+    //   core.setFailed(error)
+    // }
+    core.setFailed(error.toString())
   }
 }
 
