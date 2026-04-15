@@ -42,11 +42,10 @@ async function main() {
 main()
 
 async function getPullRequest() {
-  // TODO: query for all PR and filter by regex to be sure we don't get DC-421 if we enter DC-42
   const searchResult = await octokit.graphql(
     `
       query targetPullRequest($queryString: String!) {
-        search(last: 1, query: $queryString, type: ISSUE) {
+        search(last: 10, query: $queryString, type: ISSUE) {
           nodes {
             ... on PullRequest {
               id
@@ -68,11 +67,18 @@ async function getPullRequest() {
       }
     `,
     {
-      queryString: `is:pr ${searchString} in:title repo:${github.context.payload.repository.full_name}`
+      queryString: `is:pr is:open ${searchString} repo:${github.context.payload.repository.full_name}`
     }
   )
 
-  return searchResult.search.nodes[0]
+  const regex = new RegExp(`(^|[^a-zA-Z0-9])${searchString}([^a-zA-Z0-9]|$)`, 'i')
+  const matchedPRs = searchResult.search.nodes.filter(pr => pr.headRef && pr.headRef.name && regex.test(pr.headRef.name))
+
+  if (matchedPRs.length === 0) {
+    throw new Error(`No PR found matching branch regex for ${searchString}`)
+  }
+
+  return matchedPRs[matchedPRs.length - 1]
 }
 
 async function mergeBranch(pullRequest) {
