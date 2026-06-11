@@ -32,16 +32,27 @@ with:
 
 ## Development and release
 
-Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github) section using `@vercel/ncc` to push changes to the action or use :
+Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github) section using `@vercel/ncc` to push changes to the action or use:
 
 ```
 yarn install
-ncc build index.js --license licenses.txt
 git add .
 git commit -m "My super commit"
 git tag -a -m "My super release" vX.X.X
 git push --follow-tags
 ```
+
+`ncc build index.js --license licenses.txt` is now executed automatically before each commit via a Git `pre-commit` hook.
+
+### Release new version
+
+1. Create a Pull Request with changes.
+2. Add one of the following labels to the PR:
+   - `bump:major`: Bump major version (e.g. v1.0.0 -> v2.0.0)
+   - `bump:minor`: Bump minor version (e.g. v1.0.0 -> v1.1.0)
+   - `bump:patch`: Bump patch version (e.g. v1.0.0 -> v1.0.1)
+3. Merge the PR.
+4. The release workflow will automatically bump the version, create a release, and update major/minor tags (e.g. v1).
 
 ## License
 

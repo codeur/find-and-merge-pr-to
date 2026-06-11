@@ -73,7 +73,9 @@ async function getPullRequest() {
 
   const regex = new RegExp(`(^|[^a-zA-Z0-9])${searchString}([^a-zA-Z0-9]|$)`, 'i')
   const titleRegex = new RegExp(`^${searchString}([^a-zA-Z0-9]|$)`, 'i')
-  const matchedPRs = searchResult.search.nodes.filter((pr => pr.headRef && pr.headRef.name && regex.test(pr.headRef.name)) || (pr.title && titleRegex.test(pr.title)))
+  const matchedPRs = searchResult.search.nodes.filter(pr =>
+    (pr.headRef && pr.headRef.name && regex.test(pr.headRef.name)) || (pr.title && titleRegex.test(pr.title))
+  )
 
   if (matchedPRs.length === 0) {
     throw new Error(`No pull request found matching branch or title for ${searchString}`)

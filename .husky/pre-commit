@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+set -e
+
+yarn build
+
+# Keep generated bundle artifacts in the same commit as source changes.
+if ! git add dist/index.js dist/licenses.txt; then
+	echo "pre-commit: cannot add generated artifacts to the commit (dist/index.js and dist/licenses.txt)."
+	echo "pre-commit: run 'git add dist/index.js dist/licenses.txt' and commit again."
+	exit 1
+fi
+
+# If something still remains unstaged for generated files, stop and ask for a new commit.
+if ! git diff --quiet -- dist/index.js dist/licenses.txt; then
+	echo "pre-commit: generated artifacts (dist/index.js and dist/licenses.txt) have unstaged changes after build."
+	echo "pre-commit: run 'git add dist/index.js dist/licenses.txt' and commit again."
+	exit 1
+fi
