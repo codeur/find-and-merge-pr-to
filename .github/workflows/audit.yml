@@ -33,7 +33,9 @@ jobs:
           locale: "US"
           exclude: |
             ./node_modules/*
-            ./eslint*"
+            ./eslint*
+            ./dist/*
+            ./yarn.lock
 
   shellcheck:
     name: runner / shellcheck
