@@ -1,13 +1,15 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+
 const token = core.getInput('token')
-const octokit = github.getOctokit(token, { previews: ['merge-info-preview'] })
-const searchString = core.getInput('searchString')
-const mergeIn = core.getInput('mergeIn')
-const mergePull = core.getInput('mergePull')
+const octokit = github.getOctokit(token)
+const searchString = core.getInput('searchString').trim()
+const mergeIn = core.getInput('mergeIn').trim()
+const mergePull = core.getBooleanInput('mergePull')
 
 async function main() {
   try {
+    if (!searchString) throw new Error('searchString is required')
     if (!mergeIn && !mergePull) throw new Error('Neither mergeIn or mergePull is specified')
 
     let pullRequest = await getPullRequest()
@@ -31,17 +33,17 @@ async function main() {
       await mergeBranch(pullRequest)
     }
   } catch (error) {
-    core.info(error.stack)
-    // if (!error.toString().includes('GraphqlResponseError')) {
-    //   core.setFailed(error)
-    // }
-    core.setFailed(error.toString())
+    core.info(error.stack || String(error))
+    core.setFailed(error.message || String(error))
   }
 }
 
 main()
 
 async function getPullRequest() {
+  const owner = github.context.payload?.repository?.owner?.login || github.context.repo.owner
+  const repo = github.context.payload?.repository?.name || github.context.repo.repo
+
   const searchResult = await octokit.graphql(
     `
       query targetPullRequest($queryString: String!) {
@@ -49,6 +51,7 @@ async function getPullRequest() {
           nodes {
             ... on PullRequest {
               id
+              createdAt
               title
               headRef {
                 id
@@ -67,12 +70,13 @@ async function getPullRequest() {
       }
     `,
     {
-      queryString: `is:pr is:open ${searchString} repo:${github.context.payload.repository.full_name}`
+      queryString: `is:pr is:open ${searchString} repo:${owner}/${repo}`
     }
   )
 
-  const regex = new RegExp(`(^|[^a-zA-Z0-9])${searchString}([^a-zA-Z0-9]|$)`, 'i')
-  const titleRegex = new RegExp(`^${searchString}([^a-zA-Z0-9]|$)`, 'i')
+  const escapedSearchString = escapeRegExp(searchString)
+  const regex = new RegExp(`(^|[^a-zA-Z0-9])${escapedSearchString}([^a-zA-Z0-9]|$)`, 'i')
+  const titleRegex = new RegExp(`^${escapedSearchString}([^a-zA-Z0-9]|$)`, 'i')
   const matchedPRs = searchResult.search.nodes.filter(pr =>
     (pr.headRef && pr.headRef.name && regex.test(pr.headRef.name)) || (pr.title && titleRegex.test(pr.title))
   )
@@ -87,7 +91,7 @@ async function getPullRequest() {
 }
 
 async function mergeBranch(pullRequest) {
-  return await octokit.graphql(
+  return octokit.graphql(
     `
       mutation mergeBranch($base: String!, $commitMessage: String!, $head: String!, $repositoryId: ID!){
         mergeBranch(input: { base: $base, commitMessage: $commitMessage, head: $head, repositoryId: $repositoryId }) {
@@ -134,4 +138,8 @@ async function mergePullRequest(pullRequest) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
