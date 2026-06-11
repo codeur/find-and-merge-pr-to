@@ -2,12 +2,15 @@ name: Quality audit
 
 on: [pull_request]
 
+env:
+  GHR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   eslint:
     name: eslint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v6
       - name: Install JS dependencies
         run: yarn install
       - name: Run ESLint
