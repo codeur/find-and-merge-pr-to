@@ -1,32 +1,78 @@
 # Find and merge PR to
 
-This action finds a pull request and merges it (or its head ref to a target branch).
+This action finds an open pull request matching a search string (by title or head branch name) and either merges it or merges its head branch into a target branch.
 
 ## Inputs
 
-### `Token` (`string`)
+### `token` (`string`)
 
-**Required** Github token.
+**Required** GitHub token with `contents: write` and `pull-requests: write` permissions.
 
 ### `searchString` (`string`)
 
-**Required** The search string used for the pull request query.
+**Required** The search string used to find the pull request. It is matched (case-insensitively) against:
+- the **head branch name** (partial match allowed)
+- the **PR title** (must match from the beginning)
+
+If multiple PRs match, the most recently created one is used and a warning is emitted.
 
 ### `mergePull` (`boolean`)
 
-Wether or not merging, closing PR and deleting PR headRef.
+Default: `false`. When `true`, merges the pull request via GitHub's merge API and deletes its head branch.
 
 ### `mergeIn` (`string`)
 
-The target branch.
+Target branch. When provided, merges the PR's head branch into this branch (without closing the PR). Can be combined with `mergePull: true` to do both.
+
+> **Note:** At least one of `mergePull: true` or `mergeIn` must be specified.
+
+## Required permissions
+
+```yaml
+permissions:
+  contents: write
+  pull-requests: write
+```
+
+## Behavior
+
+1. Searches for an open PR in the current repository matching `searchString`.
+2. Waits up to 10 seconds for GitHub to resolve the PR's mergeability.
+3. Fails if the PR is not in a `MERGEABLE` / `CLEAN` state (when `mergePull` is used).
+4. Depending on inputs:
+   - `mergePull: true` → merges the PR and deletes the head branch.
+   - `mergeIn: <branch>` → merges the head branch into the target branch (PR stays open).
 
 ## Example usage
 
+### Merge head branch into a staging branch (PR stays open)
+
 ```yaml
-uses: codeur/find-and-merge-pr-to@v1
+uses: codeur/find-and-merge-pr-to@v3
 with:
   token: ${{ secrets.GITHUB_TOKEN }}
-  searchString: my awesome pullrequest
+  searchString: my-feature-branch
+  mergeIn: staging
+```
+
+### Merge the PR itself and delete the head branch
+
+```yaml
+uses: codeur/find-and-merge-pr-to@v3
+with:
+  token: ${{ secrets.GITHUB_TOKEN }}
+  searchString: my awesome pull request
+  mergePull: true
+```
+
+### Merge the PR and also merge the head branch into another branch
+
+```yaml
+uses: codeur/find-and-merge-pr-to@v3
+with:
+  token: ${{ secrets.GITHUB_TOKEN }}
+  searchString: my-feature-branch
+  mergePull: true
   mergeIn: staging
 ```
 
@@ -35,11 +81,7 @@ with:
 Refer to [Commit, tag, and push your action to GitHub](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github) section using `@vercel/ncc` to push changes to the action or use:
 
 ```
-yarn install
-git add .
-git commit -m "My super commit"
-git tag -a -m "My super release" vX.X.X
-git push --follow-tags
+yarn build
 ```
 
 `ncc build index.js --license licenses.txt` is now executed automatically before each commit via a Git `pre-commit` hook.
