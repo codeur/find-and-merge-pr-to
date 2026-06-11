@@ -31,6 +31,9 @@ jobs:
           reporter: github-pr-annotations
           fail_level: any
           locale: "US"
+          exclude: |
+            ./node_modules/*
+            ./eslint*"
 
   shellcheck:
     name: runner / shellcheck
