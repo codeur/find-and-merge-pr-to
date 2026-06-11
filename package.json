@@ -15,8 +15,10 @@
     "@codeur/eslint-config": "^1.0.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
     "@vercel/ncc": "^0.38.3",
-    "eslint": "^7.28.0",
+    "eslint": "^10.4.1",
     "husky": "^9.1.7"
   }
 }
