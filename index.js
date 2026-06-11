@@ -21,7 +21,7 @@ async function main() {
 
     if (pullRequest.mergeable !== 'MERGEABLE' || (pullRequest.mergeStateStatus !== 'CLEAN' && mergePull)) {
       throw new Error(
-        `Pull Request is not ready for merging : Mergeable -> ${pullRequest.mergeable}, Merge state status -> ${pullRequest.mergeStateStatus}`
+        `Pull request is not ready for merging (Mergeable: ${pullRequest.mergeable}, Merge state status: ${pullRequest.mergeStateStatus})`
       )
     }
 
@@ -72,13 +72,16 @@ async function getPullRequest() {
   )
 
   const regex = new RegExp(`(^|[^a-zA-Z0-9])${searchString}([^a-zA-Z0-9]|$)`, 'i')
-  const matchedPRs = searchResult.search.nodes.filter(pr => pr.headRef && pr.headRef.name && regex.test(pr.headRef.name))
+  const titleRegex = new RegExp(`^${searchString}([^a-zA-Z0-9]|$)`, 'i')
+  const matchedPRs = searchResult.search.nodes.filter((pr => pr.headRef && pr.headRef.name && regex.test(pr.headRef.name)) || (pr.title && titleRegex.test(pr.title)))
 
   if (matchedPRs.length === 0) {
-    throw new Error(`No PR found matching branch regex for ${searchString}`)
+    throw new Error(`No pull request found matching branch or title for ${searchString}`)
+  } else if (matchedPRs.length > 1) {
+    core.warning(`Multiple pull requests found matching branch or title for ${searchString}, using the most recent one.`)
   }
 
-  return matchedPRs[matchedPRs.length - 1]
+  return matchedPRs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
 }
 
 async function mergeBranch(pullRequest) {
