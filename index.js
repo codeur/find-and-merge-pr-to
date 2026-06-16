@@ -5,7 +5,7 @@ const token = core.getInput('token')
 const octokit = github.getOctokit(token)
 const searchString = core.getInput('searchString').trim()
 const mergeIn = core.getInput('mergeIn').trim()
-const mergePull = core.getBooleanInput('mergePull')
+const mergePull = core.getInput('mergePull').trim().toLowerCase() === 'true'
 
 async function main() {
   try {
