@@ -36308,7 +36308,7 @@ const token = getInput('token')
 const octokit = getOctokit(token)
 const searchString = getInput('searchString').trim()
 const mergeIn = getInput('mergeIn').trim()
-const mergePull = getBooleanInput('mergePull')
+const mergePull = getInput('mergePull').trim().toLowerCase() === 'true'
 
 async function main() {
   try {
